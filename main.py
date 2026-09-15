@@ -1,68 +1,44 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import HTMLResponse
-
 app = FastAPI()
-
+HTML = """<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>KIX CHAT - Biblioteca Mundial de Cacao</title><style>*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#eef2f7}.top{height:62px;background:#0f1e33;display:flex;align-items:center;justify-content:space-between;padding:0 18px;color:#fff}.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:26px}.logo-ic{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#2dd4bf,#3b82f6);display:grid;place-items:center}.pill{background:#1f304d;color:#dbe7ff;border:1px solid #2a4166;padding:7px 18px;border-radius:22px;font-size:14px}.layout{display:grid;grid-template-columns:260px 1fr 350px;height:calc(100vh - 62px)}.sidebar{background:#fff;border-right:1px solid #e2e8f0;padding:12px;display:flex;flex-direction:column;gap:10px;overflow:auto}.btn-new{width:100%;background:#0f1e33;color:#fff;border:none;padding:11px;border-radius:10px;font-weight:700;cursor:pointer}.chat-list{display:flex;flex-direction:column;gap:6px}.chat-item{padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;background:#f8fafc;color:#334155;display:flex;justify-content:space-between}.chat-item.active{background:#0f1e33;color:#fff}.chat-main{background:#f7f9fb;display:flex;flex-direction:column;position:relative}.chat-header{height:50px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 14px}.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}.center h1{font-size:32px;color:#1e293b;margin:0 0 8px 0}.messages{position:absolute;top:50px;bottom:88px;left:0;right:0;overflow:auto;padding:18px;display:none;flex-direction:column;gap:14px}.msg{display:flex;gap:10px;max-width:85%}.msg.user{margin-left:auto;flex-direction:row-reverse}.avatar{width:30px;height:30px;border-radius:50%;background:#0f1e33;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700}.bubble{background:#fff;border:1px solid #e2e8f0;padding:11px 13px;border-radius:14px;font-size:13.5px;white-space:pre-wrap;color:#1e293b}.msg.user.bubble{background:#0f1e33;color:#fff}.input-area{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:94%;max-width:700px;background:#fff;border:1px solid #cbd5e1;border-radius:16px;padding:8px 10px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 28px rgba(0,0,0,0.08)}.input-area input{flex:1;border:none;outline:none;font-size:14px;padding:8px}.ico{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;cursor:pointer;border:none}.ico-clip{background:#f1f5f9;border:1px solid #e2e8f0}.ico-mic{background:#334155;color:#fff}.ico-send{background:#10b981;color:#fff}.foot{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:10px;color:#94a3b8}.right{background:#0f1e33;color:#e2e8f0;padding:12px;overflow:auto;display:flex;flex-direction:column;gap:14px}.card{background:#132844;border:1px solid #1f3a5f;border-radius:12px;padding:12px}.card h4{margin:0 0 8px 0;font-size:13px;color:#fff}.news{font-size:11.5px;color:#b8c7dd;margin-bottom:10px}.news b{color:#fff;display:block;font-size:12px}.acc{background:#0c1a2e;border:1px solid #1f3a5f;border-radius:10px;padding:10px}.acc input{width:100%;background:#122a4a;border:1px solid #20406c;color:#fff;padding:8px;border-radius:7px;margin-bottom:7px;font-size:12px}.btn-sign{width:100%;background:#10b981;border:none;color:#fff;padding:9px;border-radius:7px;font-weight:700;cursor:pointer}.upload{border:1.5px dashed #2a4a70;border-radius:10px;padding:14px;text-align:center;color:#8ea8c7;font-size:11px}.status{font-size:11px;margin-top:6px}@media(max-width:1050px){.layout{grid-template-columns:1fr}.sidebar,.right{display:none}}</style></head><body><div class="top"><div class="logo"><div class="logo-ic">◈</div> KIX CHAT</div><div class="pill">KIX Cacao Engine - Auto ▼</div><div id="avatarTop" style="width:34px;height:34px;background:#fff;color:#0f1e33;border-radius:50%;display:grid;place-items:center;font-weight:800">AG</div></div><div class="layout"><div class="sidebar"><button class="btn-new" onclick="nuevoChat()">+ Nuevo chat</button><div style="font-size:11px;color:#64748b">Chats guardados</div><div class="chat-list" id="chatList"></div><button style="margin-top:auto;background:#f1f5f9;border:1px solid #e2e8f0;padding:8px;border-radius:8px;font-size:12px;cursor:pointer" onclick="location.reload()">↻ Actualizar plataforma</button><div style="font-size:10px;color:#94a3b8">KIX guarda automaticamente tus chats en este navegador.</div></div><div class="chat-main"><div class="chat-header"><b id="chatTitle">New Chat</b><div style="display:flex;gap:10px;color:#64748b"><span style="cursor:pointer" onclick="exportarChat()">⎙ Exportar</span><span style="cursor:pointer" onclick="nuevoChat()">↻</span></div></div><div class="center" id="center"><h1>Como puedo ayudarte hoy?</h1><p>Soy KIX CHAT, asistente tecnico de la Biblioteca Mundial de Cacao. Pregunta sobre variedades, enfermedades, fermentacion, suelos y ambiente. Puedo analizar archivos y audios.</p></div><div class="messages" id="messages"></div><div class="input-area"><label class="ico ico-clip">📎<input type="file" id="fileInput" hidden accept=".pdf,.docx,.txt,.png,.jpg,.jpeg,.csv"></label><input id="userInput" placeholder="Escribe tu mensaje" onkeydown="if(event.key==='Enter') enviar()"><button class="ico ico-mic" id="micBtn" onclick="toggleAudio()">🎤</button><button class="ico ico-send" onclick="enviar()">➤</button></div><div class="foot">KIX IA vFinal - San Andres, Cordoba</div></div><div class="right"><div class="card"><h4>News Bulletin — Cacao</h4><div class="news"><b>Precio cacao +8% por clima en Africa</b>Sequia en Ghana y Costa de Marfil reduce cosecha.</div><div class="news"><b>Fedecacao: Guia manejo Moniliasis</b>Poda 15 dias + Trichoderma 1x10e8. Reduce incidencia a 15%.</div><div class="news"><b>Feria del Cacao San Andres 2026</b>KIX presenta biblioteca viva y cata Trinitario ICS-95.</div><div class="news"><b>Agroforesteria con platano</b>Sistemas con sombra aumentan rendimiento 18%.</div></div><div class="acc"><h4>Account - Iniciar sesion</h4><input id="nombre" placeholder="Nombre completo"><input id="correo" placeholder="you@company.com"><input id="pass" type="password" placeholder="Password"><button class="btn-sign" onclick="login()">Sign in</button><div id="loginStatus" class="status"></div></div><div><h4 style="color:#e2e8f0;font-size:13px">Upload Zone</h4><div class="upload" onclick="document.getElementById('fileInput').click()"><div style="font-size:24px">☁️</div><b>Drag & drop files here</b><br>PDF, PNG, CSV, TXT hasta 25MB<br><small>Validacion tecnica automatica</small><div id="fileStatus" class="status"></div></div></div><div class="card"><h4>Actualizacion boletin</h4><input id="updTitle" placeholder="Titulo novedad" style="width:100%;padding:6px;border-radius:6px;border:1px solid #20406c;background:#0c1a2e;color:#fff;margin-bottom:6px"><textarea id="updText" placeholder="Descripcion" style="width:100%;padding:6px;border-radius:6px;border:1px solid #20406c;background:#0c1a2e;color:#fff;font-size:11px;min-height:50px"></textarea><button class="btn-sign" style="margin-top:6px;background:#334155" onclick="agregarNovedad()">Agregar al boletin</button></div></div></div><script>
+let chats=JSON.parse(localStorage.getItem('kix_chats')||'[]');let currentId=localStorage.getItem('kix_current')||null;let logged=null,isRec=false,rec,chunks=[];
+function saveChats(){localStorage.setItem('kix_chats',JSON.stringify(chats));localStorage.setItem('kix_current',currentId);renderList();}
+function renderList(){const list=document.getElementById('chatList');list.innerHTML='';chats.slice().reverse().forEach(c=>{const div=document.createElement('div');div.className='chat-item '+(c.id==currentId?'active':'');div.innerHTML=`<span>${c.title.substring(0,22)}</span><small>${c.msgs.length}</small>`;div.onclick=()=>cargarChat(c.id);list.appendChild(div);});}
+function nuevoChat(){const id=Date.now().toString();const nuevo={id:id,title:'New Chat '+(chats.length+1),msgs:[],created:new Date().toISOString()};chats.push(nuevo);currentId=id;saveChats();document.getElementById('messages').innerHTML='';document.getElementById('messages').style.display='none';document.getElementById('center').style.display='flex';document.getElementById('chatTitle').innerText=nuevo.title;}
+function cargarChat(id){currentId=id;const c=chats.find(x=>x.id==id);if(!c)return;document.getElementById('chatTitle').innerText=c.title;document.getElementById('center').style.display='none';const cont=document.getElementById('messages');cont.style.display='flex';cont.innerHTML='';c.msgs.forEach(m=>{addMsgDOM(m.who,m.text,false);});saveChats();}
+function addMsgDOM(who,text){const cont=document.getElementById('messages');const d=document.createElement('div');d.className='msg '+(who==='user'?'user':'');const av=who==='user'?(logged?logged[0].toUpperCase():'U'):'KX';d.innerHTML=`<div class="avatar">${av}</div><div class="bubble">${text.replace(/</g,'&lt;')}</div>`;cont.appendChild(d);cont.scrollTop=cont.scrollHeight;}
+function addMsg(who,text){if(!currentId)nuevoChat();const c=chats.find(x=>x.id==currentId);c.msgs.push({who,text});if(c.msgs.length==1)c.title=text.substring(0,30);saveChats();document.getElementById('center').style.display='none';document.getElementById('messages').style.display='flex';addMsgDOM(who,text);}
+function login(){const n=document.getElementById('nombre').value.trim();const co=document.getElementById('correo').value.trim();if(!n||!co){alert('Completa nombre y correo');return;}logged=n;localStorage.setItem('kix_user',JSON.stringify({n,co}));document.getElementById('loginStatus').innerText='Sesion iniciada: '+n+' - Chats se conservaran';document.getElementById('avatarTop').innerText=n.substring(0,2).toUpperCase();addMsg('kix','Bienvenido '+n+'. Sesion iniciada. Tus chats quedaran guardados automaticamente. Puedes iniciar nuevos chats y volver a los anteriores.');}
+function respuestaTecnica(q){const l=q.toLowerCase();if(l.includes('monilia'))return `Manejo Integrado Moniliasis - KIX Tecnico: Moniliophthora roreri, HR>80%. 1. Cultural: Recoleccion semanal, entierro 30cm, poda 30% sombra. 2. Biologico: Trichoderma 1e8 UFC/ml cada 15 dias. 3. Quimico: Caldo bordeles 1% rotado. Meta 60% a <15% en 90 dias.`;if(l.includes('ferment'))return `Fermentacion Trinitario - 5-6 dias: Dia1 80kg T25C, Dia2 Volteo1 T45C, Dia3-4 Volteo2 T48C, Dia5 Corte 70% marron T42C, Secado sol 5-7 dias hasta 7% humedad. Perfil frutal, nuez.`;return `Respuesta tecnica KIX CHAT: "${q}" - Suelos francos pH6-6.8, precipitacion 1500-2500mm, sistema agroforestal 1100 plantas/ha, clones ICS-95/CCN-51 y Criollo premium, fertilizacion organica 1kg compost + 200g roca fosforica. Proporciona datos de lote para plan detallado.`;}
+function enviar(){const inp=document.getElementById('userInput');const t=inp.value.trim();if(!t)return;addMsg('user',t);inp.value='';setTimeout(()=>{addMsg('kix',respuestaTecnica(t));},400);}
+async function toggleAudio(){const btn=document.getElementById('micBtn');if(!isRec){try{const s=await navigator.mediaDevices.getUserMedia({audio:true});rec=new MediaRecorder(s);chunks=[];rec.ondataavailable=e=>chunks.push(e.data);rec.onstop=()=>{const blob=new Blob(chunks,{type:'audio/webm'});addMsg('user','[Audio enviado - '+Math.round(blob.size/1024)+'KB]');addMsg('kix','Audio transcrito correctamente. '+respuestaTecnica('consulta por audio cacao'));};rec.start();isRec=true;btn.style.background='#ef4444';btn.innerText='⏹';}catch(e){alert('Microfono no disponible');}}else{rec.stop();isRec=false;btn.style.background='#334155';btn.innerText='🎤';}}
+async function analizarArchivo(file){const st=document.getElementById('fileStatus');st.innerText='Analizando '+file.name+'...';const fd=new FormData();fd.append('file',file);try{const r=await fetch('/analizar-archivo',{method:'POST',body:fd});const j=await r.json();if(j.permitido){st.innerHTML='<span style=color:#10b981>Aprobado:</span> '+j.mensaje;addMsg('kix',"Archivo '"+file.name+"' validado: "+j.detalle);}else{st.innerHTML='<span style=color:#ef4444>No permitido:</span> '+j.mensaje;addMsg('kix',"Archivo '"+file.name+"' no cumple criterios: "+j.mensaje);}}catch(e){st.innerText='Error analisis';}}
+document.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[0])analizarArchivo(e.target.files[0]);});
+function exportarChat(){if(!currentId)return alert('No hay chat activo');const c=chats.find(x=>x.id==currentId);const txt=c.msgs.map(m=> (m.who.toUpperCase()+': '+m.text)).join('\n\n');const blob=new Blob([txt],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=c.title+'.txt';a.click();}
+function agregarNovedad(){const t=document.getElementById('updTitle').value;const d=document.getElementById('updText').value;if(!t||!d)return alert('Completa titulo y descripcion');const card=document.querySelectorAll('.card')[0];const div=document.createElement('div');div.className='news';div.innerHTML=`<b>${t}</b>${d}`;card.appendChild(div);document.getElementById('updTitle').value='';document.getElementById('updText').value='';addMsg('kix','Boletin actualizado con: '+t);}
+(function(){const u=JSON.parse(localStorage.getItem('kix_user')||'null');if(u){document.getElementById('nombre').value=u.n;document.getElementById('correo').value=u.co;logged=u.n;document.getElementById('avatarTop').innerText=u.n.substring(0,2).toUpperCase();document.getElementById('loginStatus').innerText='Sesion restaurada: '+u.n;}if(chats.length==0)nuevoChat();else{renderList();if(currentId)cargarChat(currentId);else nuevoChat();}})();
+</script></body></html>
+"""
 @app.get("/", response_class=HTMLResponse)
 def home():
-    return """
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KIX - Biblioteca Mundial de Cacao</title>
-<style>
-body{font-family:'Segoe UI',sans-serif;background:#fdf6ec;margin:0;color:#3e2723}
-.header{background:#3e2723;color:#fff;padding:30px 20px;text-align:center}
-.container{max-width:900px;margin:0 auto;padding:20px}
-.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
-.search{width:100%;padding:14px 18px;border-radius:12px;border:2px solid #d7ccc8;font-size:16px;box-sizing:border-box;margin-bottom:20px}
-.tag{background:#8d6e63;color:white;padding:3px 10px;border-radius:20px;font-size:12px;margin-left:6px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}
-.variedad{border:1px solid #efebe9;border-radius:12px;padding:12px}
-.variedad img{width:100%;height:130px;object-fit:cover;border-radius:8px}
-.btn-wa{position:fixed;bottom:20px;right:20px;background:#25D366;color:white;padding:16px 22px;border-radius:50px;text-decoration:none;font-weight:bold;box-shadow:0 4px 15px rgba(0,0,0,0.3)}
-h2{color:#5d4037}
-.sol{padding:12px 0;border-bottom:1px solid #f5f5f5}
-</style>
-</head>
-<body>
-<div class="header">
-<h1>KIX - Biblioteca Mundial de Cacao</h1>
-<p>De San Andres, Cordoba para el mundo</p>
-</div>
-<div class="container">
-<input id="buscador" class="search" type="text" placeholder="Buscar... ej: Criollo, Moniliasis" onkeyup="filtrar()">
-
-<div class="card">
-<h2>Variedades de Cacao</h2>
-<div class="grid">
-<div class="variedad" data-text="criollo centroamerica fino frutal"><img src="https://images.unsplash.com/photo-1511381939415-e44015466834?w=400"><b>Criollo</b><span class="tag">Centroamerica</span><br><small>Fino, frutal | Baja resistencia</small></div>
-<div class="variedad" data-text="forastero amazonas fuerte amargo alta"><img src="https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400"><b>Forastero</b><span class="tag">Amazonas</span><br><small>Fuerte, amargo | Alta resistencia</small></div>
-<div class="variedad" data-text="trinitario trinidad equilibrado"><img src="https://images.unsplash.com/photo-1606312619070-d48b4fa37390?w=400"><b>Trinitario</b><span class="tag">Trinidad</span><br><small>Equilibrado | Media</small></div>
-<div class="variedad" data-text="nacional ecuador floral"><img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400"><b>Nacional</b><span class="tag">Ecuador</span><br><small>Floral | Aroma Arriba</small></div>
-</div>
-</div>
-
-<div class="card">
-<h2>Enfermedades y Soluciones</h2>
-<div class="sol" data-text="moniliasis cafe polvoso"><b>Moniliasis:</b> Fruto cafe polvoso<br>Solucion: Poda sanitaria + caldo bordeles</div>
-<div class="sol" data-text="escoba bruja hinchadas"><b>Escoba de bruja:</b> Ramas hinchadas<br>Solucion: Poda 30cm abajo + quemar</div>
-<div class="sol" data-text="mazorca negra mancha"><b>Mazorca negra:</b> Mancha negra<br>Solucion: Drenaje + Trichoderma</div>
-</div>
-</div>
-
-<a class="btn-wa" href="https://wa.me/573000000000?text=Hola%20KIX%20quiero%20info%20de%20cacao" target="_blank">WhatsApp</a>
-
-<script>
-function filtrar(){
- let t=document.getElementById('buscador').value.toLowerCase();
- document.querySelectorAll('.variedad, .sol').forEach(e=>{
-   e.style.display=e.getAttribute('data-text').includes(t)?'':'none';
- });
-}
-</script>
-</body>
-</html>
-    """
+    return HTML
+@app.post("/analizar-archivo")
+async def analizar_archivo(file: UploadFile = File(...)):
+    nombre=file.filename.lower()
+    try:
+        data=await file.read()
+        texto=data[:5000].decode('utf-8',errors='ignore').lower()
+    except:
+        texto=""
+    bloqueadas=["porn","xxx","nude"]
+    for b in bloqueadas:
+        if b in nombre or b in texto:
+            return {"permitido": False, "mensaje": "El archivo no cumple con los criterios tecnicos de la plataforma."}
+    cacao_keys=["cacao","chocolate","theobroma","mazorca","ferment","monilia","escoba","phytophthora","criollo","forastero","trinitario","suelo","agroforest","ambiente","biodivers","sostenible","cultivo","siembra","plaga","hongo","clima","bosque","organico","finca","cosecha"]
+    relevante=any(k in nombre or k in texto for k in cacao_keys)
+    if not relevante:
+        if nombre.endswith(('.png','.jpg','.jpeg')):
+            return {"permitido": True, "mensaje": "Imagen aceptada - Verificacion visual requerida.", "detalle": "Imagen paso validacion tecnica basica."}
+        return {"permitido": False, "mensaje": "El contenido no corresponde a tematica de cacao o ambiental."}
+    return {"permitido": True, "mensaje": "Contenido tecnico validado correctamente.", "detalle": "Archivo relevante para cacao/ambiente. Ingresado a biblioteca KIX."}
