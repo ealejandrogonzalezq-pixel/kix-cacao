@@ -1,3 +1,9 @@
 fastapi
 uvicorn
 python-multipart
+openai
+requests
+beautifulsoup4
+wikipedia
+duckduckgo-search
+lxml
