@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIX - Biblioteca Mundial de Cacao</title>
+<style>
+body{font-family:Arial; background:#f5efe6; margin:0; padding:20px; color:#3e2723}
+header{background:#4e342e; color:white; padding:30px; text-align:center; border-radius:15px}
+.card{background:white; padding:20px; margin:15px 0; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1)}
+h2{color:#6d4c41} .badge{background:#a1887f; color:white; padding:4px 10px; border-radius:20px; font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<h1>🌱 KIX - Biblioteca Mundial de Cacao</h1>
+<p>De San Andrés, Córdoba para el mundo - Variedades, Enfermedades y Saberes</p>
+</header>
+
+<div class="card">
+<h2>📚 Variedades de Cacao</h2>
+<div id="variedades">Cargando...</div>
+</div>
+
+<div class="card">
+<h2>🩺 Enfermedades y Soluciones</h2>
+<div id="enfermedades">Cargando...</div>
+</div>
+
+<div class="card">
+<h2>📁 Tu Biblioteca</h2>
+<p>Aquí podrás subir PDFs, fotos de la finca, análisis de suelo.</p>
+</div>
+
+<script>
+fetch('/api/variedades').then(r=>r.json()).then(data=>{
+  document.getElementById('variedades').innerHTML = data.map(v=>`<p><b>${v.nombre}</b> <span class="badge">${v.origen}</span> - ${v.sabor} | Resistencia: ${v.resistencia}</p>`).join('');
+});
+fetch('/api/enfermedades').then(r=>r.json()).then(data=>{
+  document.getElementById('enfermedades').innerHTML = data.map(e=>`<p><b>${e.nombre}:</b> ${e.sintoma} <br>✅ <i>${e.solucion}</i></p>`).join('');
+});
+</script>
+</body>
+</html>
